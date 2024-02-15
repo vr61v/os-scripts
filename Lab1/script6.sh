@@ -1,5 +1,8 @@
 #!/bin/bash
-dir="/var/log/anaconda/syslog"
-warn="s/WARNING/Warning:/p"
-info="s/INFO/Information:/"
-sed $warn $dir | sed $info > full.log
+dir="/var/log/anaconda/X.log"
+warn="s/(WW)/Warning:/p"
+info="s/(II)/Information:/"
+text=$(sed $warn $dir | sed $info)
+grep "Information:" <<< $text > full.log
+grep "Warning:" <<< $text >> full.log
+cat full.log
