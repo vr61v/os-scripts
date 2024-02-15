@@ -6,6 +6,6 @@ while [[ "$item" != "4" ]]; do
   case $item in
   "1") nano "test" ;;
   "2") vi "test" ;;
-  "3") xdg-open http://google.com ;;
+  "3") links http://google.com ;;
   esac
 done
