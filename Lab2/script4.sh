@@ -9,9 +9,10 @@ for i in $process; do
   ser=$(cat /proc/$i/sched | grep 'sum_exec_runtime' | awk '{print $3}')
   ns=$(cat /proc/$i/sched | grep 'nr_switches' | awk '{print $3}')
   art=$(echo "$ser/$ns" | bc -l)
-  echo "$i $ppid $art" >> $outFile
+  nice=$(ps -p $i -o pid,ni --no-header | awk '{print $2}')
+  echo "$i $ppid $art $nice" >> $outFile
 done
 
 sort $outFile -o $outFileSorted -nk2
-awk '{print "ProcessID="$1" : Parent_ProcessID="$2" : Average_Running_Time="$3}' $outFileSorted > $outFile
+awk '{print "ProcessID="$1" : Parent_ProcessID="$2" : Average_Running_Time="$3" : Nice="$4}' $outFileSorted > $outFile
 rm $outFileSorted

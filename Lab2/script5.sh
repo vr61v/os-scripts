@@ -7,7 +7,7 @@ while read line; do
 
   if [[ $currentPpid -ne $ppid ]]; then
     result=$(bc -l <<<"$sum/$count")
-    echo "Average_Running_Children_of_ParentID=$ppid is $result" >> "outFile_5.txt"
+    echo "Average_Running_Children_of_ParentID=$currentPpid is $result" >> "outFile_5.txt"
     currentPpid=$ppid; sum=.0; count=0
   fi
 
