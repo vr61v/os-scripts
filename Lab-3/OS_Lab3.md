@@ -52,6 +52,7 @@ echo "*/5 * * * 1 script1.sh" | crontab
 1. Бесконечный цикл x+=1
 ```
 #!/bin/bash
+echo $$ > $1
 x=1
 while true; do
   x=$(($x + 1))
@@ -60,9 +61,19 @@ done
 2. Запуск процессов
 ```
 #!/bin/bash
-nice -n 15 bash script4_while.sh&
-nice -n 0 bash script4_while.sh&
-nice -n 0 bash script4_while.sh&
+bash script4_while.sh&pid1=$!
+bash script4_while.sh&pid2=$!
+bash script4_while.sh&pid3=$!
+while true; do
+  cpu=$(ps -p $pid1 -o pcpu | tail -n 1)
+  if (( $(echo "$cpu > 10.0" | bc -l) )); then
+    ni=$(ps -p $pid1 -o ni | tail -n 1)
+    if [ $ni -le 19 ]; 
+      then ni=$(($ni+1))
+      renice -n $ni -p $pid1
+    fi
+  fi
+done
 ```
 
 ### Script 5
@@ -152,5 +163,42 @@ while true; do
   esac
   echo $val
   sleep 1
+done
+```
+
+### Script 7
+Создайте пару скриптов: генератор и обработчик. Процесс «Генератор» считывает с консоли строки в
+бесконечном цикле, в котором он посылает процессу «Обработчик» строки из 5 символов. Если строка 
+частично совпадает с загаданной в «Обработчик», то процесс выводит места совпадения(11111 и 12311 
+совпадают в 034). Если же строка полностью совпадает с загаданной, то обработчик выводит количество
+попыток и завершает работу.
+1. «Генератор»
+```
+#!/bin/bash
+while true; do
+  read line
+  echo "$line" >> "script7_infile"
+done
+rm "script7_infile"
+```
+
+2. «Обработчик»
+```
+#!/bin/bash
+word=$(shuf -i 10000-100000 -n 1)
+try=0
+echo $word
+(tail -f "script7_infile") | while true; do
+  read line
+  result=""
+  for i in 0 1 2 3 4; do
+    if [ "${line:$i:1}" == "${word:$i:1}" ]; then 
+      result="$result$i"
+    fi
+  done
+  echo "result: $result"
+  
+  let try=$try+1
+  if [ "$result" == "01234" ]; then echo "try: $try"; exit; fi
 done
 ```
