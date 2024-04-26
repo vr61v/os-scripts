@@ -1,11 +1,10 @@
 #!/bin/bash
 if [ $# -ne 1 ]; then exit 1; fi
 
-files=$(grep -h "$1" "$HOME"/trash.log)
-echo "$files"
+files=$(grep -h "$(echo "$1" | tr ' ' @)" "$HOME"/trash.log)
 for i in $files; do
-  oldpath=$(echo "$i" | awk -F ":" '{print $1}')
-  newpath=$(echo "$i" | awk -F ":" '{print $2}')
+  oldpath=$(echo "$i" | awk -F ":" '{print $1}' | tr @ ' ')
+  newpath=$(echo "$i" | awk -F ":" '{print $2}' | tr @ ' ')
   removed=$HOME/.trash/$newpath
   echo "restore the $oldpath (y/n)?"
   read -r answer
